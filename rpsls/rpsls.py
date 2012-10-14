@@ -70,11 +70,11 @@ def rpsls(name):
     # use if/elif/else to determine winner
     
     if diff == 0:
-        return "A tie!"
+        winner = "A tie"
     elif diff <= 2 and diff > 0:
-        return "Player wins!"
+        winner = "Player wins!"
     elif diff > 2:
-        return "Computer wins!"
+        winner = "Computer wins"
     else:
         return "Still need to decide"
     
@@ -85,7 +85,7 @@ def rpsls(name):
     # print results
     print "Player chooses " + name
     print "Computer chooses " + comp_name
-    print rpsls(name)
+    print winner
 
 # test your code
 rpsls("rock")
@@ -95,5 +95,4 @@ rpsls("lizard")
 rpsls("scissors")
 
 # always remember to check your completed program against the grading rubric
-
 
