@@ -27,12 +27,12 @@ def number_to_name(number):
         return "Spock"
     elif number == 2:
         return "paper"
-	elif number == 3:
+    elif number == 3:
         return "lizard"
     elif number == 4:
         return "scissors"
-    else
-    	return "invalid number"
+    else:
+        print "invalid number"
     
 def name_to_number(name):
     # fill in your code below
@@ -40,24 +40,24 @@ def name_to_number(name):
     # convert name to number using if/elif/else
     # don't forget to return the result!
     
-    if name = "rock"
-    	return 0
-    elif name = "Spock"
-    	return 1
-    elif name = "paper"
-    	return 2
-    elif name = "lizard"
-    	return 3
-    elif name = "scissors"
-    	return 4
-	else
-    	return "invalid name"
+    if name == "rock":
+        return 0
+    elif name == "Spock":
+        return 1
+    elif name == "paper":
+        return 2
+    elif name == "lizard":
+        return 3
+    elif name == "scissors":
+        return 4
+    else:
+        print "invalid name"
 
 def rpsls(name): 
     # fill in your code below
     # convert name to player_number using name_to_number
     
-	player_number = name_to_number(name)
+    player_number = name_to_number(name)
     
     # compute random guess for comp_number using random.randrange()
     
@@ -67,9 +67,16 @@ def rpsls(name):
     
     diff = (player_number - comp_number) % 5
     
-	# use if/elif/else to determine winner
+    # use if/elif/else to determine winner
     
-    if diff <= 2 
+    if diff == 0:
+        return "A tie!"
+    elif diff <= 2 and diff > 0:
+        return "Player wins!"
+    elif diff > 2:
+        return "Computer wins!"
+    else:
+        return "Still need to decide"
     
     # convert comp_number to name using number_to_name
     
@@ -78,6 +85,7 @@ def rpsls(name):
     # print results
     print "Player chooses " + name
     print "Computer chooses " + comp_name
+    print rpsls(name)
 
 # test your code
 rpsls("rock")
