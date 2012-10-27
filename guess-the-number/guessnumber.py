@@ -15,7 +15,6 @@ i = 7
 
 # event handlers for control panel
 
-
 def init():
     # begins a new game
     global num_range
@@ -31,7 +30,7 @@ def range100():
     global i
     i = 7
     num_range = 100
-    secret_number = random.randrange(0, 101)
+    secret_number = random.randrange(0, 100)
     print "New Game. Enter a number between 0 and",num_range
 
 def range1000():
@@ -41,35 +40,38 @@ def range1000():
     global i
     i = 10
     num_range = 1000
-    secret_number = random.randrange(0, 1001)
+    secret_number = random.randrange(0, 1000)
     print "New Game. Enter a number between 0 and",num_range
 
 def get_input(guess):
     # main game logic goes here
     global secret_number
     global i
-    print "You guessed " + guess
-    if int(guess) == secret_number:
-        print "Your guess is correct!\n"
-        init()
-    elif int(guess) > secret_number:
-        i = i - 1
-        print "Lower"
-        print "You have", i,"guesses left.\n"
-    elif int(guess) < secret_number:
-        i = i - 1
-        print "Higher"
-        print "You have", i,"guesses left.\n"
-    if i == 0:
-        print "You've run out of guesses. Try a new game.."
-        init()
+    if str.isdigit(guess):
+        print "You guessed " + guess
+        if int(guess) == secret_number:
+            print "Your guess is correct!\n"
+            init()
+        elif int(guess) > secret_number:
+            i = i - 1
+            print "Lower"
+            print "You have", i,"guesses left.\n"
+        elif int(guess) < secret_number:
+            i = i - 1
+            print "Higher"
+            print "You have", i,"guesses left.\n"
+        if i == 0:
+            print "You've run out of guesses. Try a new game.."
+            init()
+    else:
+        print "Invalid entry. Please enter an in-range number.\n"
         
 # create frame
 frame = simplegui.create_frame("Guess the Number", 200, 200)
 
 # registration of event handlers for control elements
-frame.add_button("Range: 0 - 100", range100, 200)
-frame.add_button("Range: 0 - 1000", range1000, 200)
+frame.add_button("Range: [0,100)", range100, 200)
+frame.add_button("Range: [0,1000)", range1000, 200)
 frame.add_input("Enter a guess", get_input, 200)
 
 # start frame
