@@ -3,7 +3,7 @@
 import simplegui
 import random
 
-# initialize globals - pos and vel encode vertical info for paddles
+# initialize globals
 WIDTH = 600
 HEIGHT = 400       
 BALL_RADIUS = 20
@@ -17,6 +17,8 @@ paddle1_pos = HEIGHT / 2
 paddle2_pos = HEIGHT / 2
 paddle1_vel = 0
 paddle2_vel = 0
+score1 = 0
+score2 = 0
 
 # helper function that spawns a ball, returns a position vector and a velocity vector
 # if right is True, spawn to the right, else spawn to the left
@@ -27,12 +29,13 @@ def ball_init(right):
         ball_vel = [(random.randrange(120, 240) // 60), - (random.randrange(60, 180) // 60)]
     if right == False:
         ball_vel = [- (random.randrange(120, 240) // 60), - (random.randrange(60, 180) // 60)]
-    print ball_vel
     
 # define event handlers
 def init():
     global paddle1_pos, paddle2_pos, paddle1_vel, paddle2_vel  # these are floats
     global score1, score2  # these are ints
+    score1 = 0
+    score2 = 0
     ball_init(True)
 
 def draw(c):
@@ -75,25 +78,28 @@ def draw(c):
         if ball_pos[1] <= paddle2_pos + HALF_PAD_HEIGHT and ball_pos[1] >= paddle2_pos - HALF_PAD_HEIGHT:
             ball_vel[0] = -(ball_vel[0] * 1.1)
     if ball_pos[0] < PAD_WIDTH:
+        score2 += 1
         ball_init(True)
     if ball_pos[0] > WIDTH - PAD_WIDTH:
         ball_init(False)
+        score1 += 1
         
     # draw ball and scores
     c.draw_circle(ball_pos, 20, 1, "White", "White")
-    
+    c.draw_text(str(score1), [WIDTH*.22,80], 60, "White")
+    c.draw_text(str(score2), [WIDTH*.72,80], 60, "White")
     
 def keydown(key):
     global paddle1_vel, paddle2_vel, paddle1_pos, HALF_PAD_HEIGHT
     if key==simplegui.KEY_MAP["w"]:
-            paddle1_vel = -4
+        paddle1_vel = -4
     elif key==simplegui.KEY_MAP["s"]:
-            paddle1_vel = 4
+        paddle1_vel = 4
     elif key==simplegui.KEY_MAP["up"]:
         paddle2_vel = -4
     elif key==simplegui.KEY_MAP["down"]:
         paddle2_vel = 4
-   
+
 def keyup(key):
     global paddle1_vel, paddle2_vel
     if key==simplegui.KEY_MAP["w"]:
@@ -111,7 +117,6 @@ frame.set_draw_handler(draw)
 frame.set_keydown_handler(keydown)
 frame.set_keyup_handler(keyup)
 frame.add_button("Restart", init, 100)
-
 
 # start frame
 init()
