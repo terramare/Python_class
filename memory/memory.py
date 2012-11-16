@@ -3,7 +3,8 @@
 import simplegui
 import random
 
-# helper function to initialize globals
+# all global variables are initialized via a call to init()
+# this occurs on application launch and by pressing Restart button
 def init():
     global deck, exposed, width, card, state, try1, try2, moves
     deck = [card % 8 for card in range(16)]
@@ -11,7 +12,6 @@ def init():
     exposed = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
     width = 800
     state = 0
-    print deck
     try1 = None
     try2 = None
     moves = 0
@@ -23,28 +23,27 @@ def mouseclick(pos):
     card = pos[0] // 50
     if exposed[card] == False:
         exposed[card] = True
-    if state == 0:
-        try1 = card
-        state = 1
-    elif state == 1:
-        try2 = try1
-        try1 = card
-        state = 2
-    else:
-        if deck[try2] == deck[try1]:
-            exposed[try1] = True
-            exposed[try2] = True
+        if state == 0:
+            try1 = card
+            state = 1
+        elif state == 1:
+            try2 = try1
+            try1 = card
+            state = 2
         else:
-            exposed[try1] = False
-            exposed[try2] = False
-        moves += 1
-        label.set_text("Moves = " + str(moves))
-        try1 = card
-        state = 1
-    print "State: ", state
+            if deck[try2] == deck[try1]:
+                exposed[try1] = True
+                exposed[try2] = True
+            else:
+                exposed[try1] = False
+                exposed[try2] = False
+            moves += 1
+            label.set_text("Moves = " + str(moves))
+            try1 = card
+            state = 1
 
-# cards are logically 50x100 pixels in size    
 def draw(canvas):
+    #each draw call determines whether card should be face up or down and draws respectively
     global deck, exposed, width, card, state
     textpos = 10
     i = 0
@@ -60,17 +59,17 @@ def draw(canvas):
         textpos += 50
         xinc += 50
 
-# create frame and add a button and labels
+# creates frame, button, and label
 frame = simplegui.create_frame("Memory", 800, 100)
 frame.add_button("Restart", init)
 label = frame.add_label("Moves = 0")
 
-# initialize global variables
+# initializes global variables and beginning game state
 init()
 
-# register event handlers
+# registers event handlers
 frame.set_mouseclick_handler(mouseclick)
 frame.set_draw_handler(draw)
 
-# get things rolling
+# gets things rolling
 frame.start()
