@@ -17,6 +17,9 @@ in_play = False
 outcome = ""
 score = 0
 popped = []
+player = []
+dealer = []
+deck = []
 
 # define globals for cards
 SUITS = ('C', 'S', 'H', 'D')
@@ -104,16 +107,23 @@ class Deck:
         # print str(self.cards)
 
     def deal_card(self):
-        self.cards.pop(0)
         popped = self.cards.pop(0)
         return popped
     
 #define event handlers for buttons
 def deal():
-    global outcome, in_play
-
-    # your code goes here
-    
+    global outcome, in_play, player, dealer, deck
+    # deck = []
+    deck = Deck()
+    player = Hand()
+    dealer = Hand()
+    player.add_card(deck.deal_card())
+    dealer.add_card(deck.deal_card())
+    player.add_card(deck.deal_card())
+    dealer.add_card(deck.deal_card())
+    print "Player's Hand: " + str(player)
+    print "Dealer's Hand: " + str(dealer)
+    print deck
     in_play = True
 
 def hit():
@@ -139,19 +149,19 @@ def draw(canvas):
 
 
 # initialization frame
-#frame = simplegui.create_frame("Blackjack", 600, 600)
-#frame.set_canvas_background("Green")
+frame = simplegui.create_frame("Blackjack", 600, 600)
+frame.set_canvas_background("Green")
 
-#create buttons and canvas callback
-#frame.add_button("Deal", deal, 200)
-#frame.add_button("Hit",  hit, 200)
-#frame.add_button("Stand", stand, 200)
-#frame.set_draw_handler(draw)
+# create buttons and canvas callback
+frame.add_button("Deal", deal, 200)
+frame.add_button("Hit",  hit, 200)
+frame.add_button("Stand", stand, 200)
+frame.set_draw_handler(draw)
 
 # deal an initial hand
 
 # get things rolling
-#frame.start()
+frame.start()
 
 
 # remember to review the gradic rubric
@@ -161,15 +171,14 @@ def draw(canvas):
 #card = Card('H', '2')
 #hand.add_card(card)
 #print "Now the hand is", hand
-deck = Deck()
-print "the deck's first card is", deck.deal_card()
-card = deck.deal_card()  # Get a second card
-print "the second card is", card
-card = deck.deal_card()  # Get a third card
-print "the third card is", card
-print "Going to hit a hand twice."
-hand = Hand()
-hand.add_card(deck.deal_card())
-hand.add_card(deck.deal_card())
-print "The result is:", hand
-print deck
+#deck = Deck()
+#print "the deck's first card is", deck.deal_card()
+#card = deck.deal_card()  # Get a second card
+#print "the second card is", card
+#card = deck.deal_card()  # Get a third card
+#print "the third card is", card
+#print "Going to hit a hand twice."
+#hand = Hand()
+#hand.add_card(deck.deal_card())
+#hand.add_card(deck.deal_card())
+#print "The result is:", hand
