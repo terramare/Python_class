@@ -72,8 +72,13 @@ class Hand:
 
     # count aces as 1, if the hand has an ace, then add 10 to hand value if it doesn't bust
     def get_value(self):
-        for card in Hand:
-            value += VALUES[i] 
+        value = 0
+        for card in self.player_hand:
+            rank = card.get_rank()
+            value = value + VALUES[rank]
+            if rank == 'A' and value < 12:
+                value += 10
+        return value
 
     def busted(self):
         pass	# replace with your code
@@ -88,9 +93,7 @@ class Deck:
         #cards = []
         popped = []
         self.cards = [Card(suit, rank) for suit in SUITS for rank in RANKS]
-        #self.cards = cards
         self.shuffle()
-        #self.deal_card = deal_card
         
     def __str__(self):
         s = ''
@@ -123,7 +126,8 @@ def deal():
     dealer.add_card(deck.deal_card())
     print "Player's Hand: " + str(player)
     print "Dealer's Hand: " + str(dealer)
-    print deck
+    print player.get_value()
+    print dealer.get_value()
     in_play = True
 
 def hit():
@@ -147,7 +151,6 @@ def draw(canvas):
     card = Card("S", "A")
     card.draw(canvas, [300, 300])
 
-
 # initialization frame
 frame = simplegui.create_frame("Blackjack", 600, 600)
 frame.set_canvas_background("Green")
@@ -159,10 +162,10 @@ frame.add_button("Stand", stand, 200)
 frame.set_draw_handler(draw)
 
 # deal an initial hand
+deal()
 
 # get things rolling
 frame.start()
-
 
 # remember to review the gradic rubric
 #hand = Hand()
