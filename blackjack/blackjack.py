@@ -131,33 +131,39 @@ def deal():
     in_play = True
 
 def hit():
-    global in_play
+    global in_play, score, message
     if in_play == True:
         player.add_card(deck.deal_card())
         print "Player's Hand: " + str(player)
         print str(player.get_value())
         if player.get_value() > 21:
             in_play = False
-            print "Player has busted! Dealer wins."
+            message = "Player has busted! Dealer wins."
+            print message
+            score -= 1
        
 def stand():
-    global in_play, outcome
+    global in_play, outcome, score, message
     if in_play == False:
         print "You busted already!"
     else:
         while dealer.get_value() <= 17:
             dealer.add_card(deck.deal_card())
-            print "Dealer has " + str(dealer.get_value())
+            message = "Dealer has " + str(dealer.get_value())
+            print message
         print "Dealer has " + str(dealer.get_value())
         if dealer.get_value() > 21:
-            print "Dealer busted. You win!"
+            message = "Dealer busted. You win!"
+            score += 1
+            print message + str(score)
         elif dealer.get_value() >= player.get_value():
             print "Dealer wins."
+            score -= 1
+            print message + str(score)
         elif dealer.get_value() < player.get_value():
-            print "You win!"
-        else:
-            print "Debug: no if clauses were True"
-        
+            message = "You win!"
+            score += 1
+            print message + str(score)
     # assign a message to outcome, update in_play and score
 
 # draw handler    
