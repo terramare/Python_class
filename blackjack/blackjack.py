@@ -131,17 +131,33 @@ def deal():
     in_play = True
 
 def hit():
-    pass	# replace with your code below
- 
-    # if the hand is in play, hit the player
-   
-    # if busted, assign an message to outcome, update in_play and score
+    global in_play
+    if in_play == True:
+        player.add_card(deck.deal_card())
+        print "Player's Hand: " + str(player)
+        print str(player.get_value())
+        if player.get_value() > 21:
+            in_play = False
+            print "Player has busted! Dealer wins."
        
 def stand():
-    pass	# replace with your code below
-   
-    # if hand is in play, repeatedly hit dealer until his hand has value 17 or more
-
+    global in_play, outcome
+    if in_play == False:
+        print "You busted already!"
+    else:
+        while dealer.get_value() <= 17:
+            dealer.add_card(deck.deal_card())
+            print "Dealer has " + str(dealer.get_value())
+        print "Dealer has " + str(dealer.get_value())
+        if dealer.get_value() > 21:
+            print "Dealer busted. You win!"
+        elif dealer.get_value() >= player.get_value():
+            print "Dealer wins."
+        elif dealer.get_value() < player.get_value():
+            print "You win!"
+        else:
+            print "Debug: no if clauses were True"
+        
     # assign a message to outcome, update in_play and score
 
 # draw handler    
