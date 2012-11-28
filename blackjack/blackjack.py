@@ -119,7 +119,17 @@ class Deck:
     
 #define event handlers for buttons
 def deal():
-    global in_play, player, dealer, deck, message
+    global in_play, player, dealer, deck, message, score
+    if in_play == True:
+        message = "Okay, here is a new hand"
+        score -= 1
+        deck = Deck()
+        player = Hand()
+        dealer = Hand()
+        player.add_card(deck.deal_card())
+        dealer.add_card(deck.deal_card())
+        player.add_card(deck.deal_card())
+        dealer.add_card(deck.deal_card())
     if in_play == False:
         deck = Deck()
         player = Hand()
