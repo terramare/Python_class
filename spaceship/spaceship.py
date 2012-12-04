@@ -94,15 +94,59 @@ class Ship:
         self.image_center = info.get_center()
         self.image_size = info.get_size()
         self.radius = info.get_radius()
+        self.forward = [0,0]
         
     def draw(self,canvas):
         #canvas.draw_circle(self.pos, self.radius, 1, "White", "White")
         canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size, self.angle)
+        if self.thrust == True:
+            canvas.draw_image(self.image, [self.image_center[0] + 90, self.image_center[1]], self.image_size, self.pos, self.image_size, self.angle)
 
     def update(self):
         self.angle += self.angle_vel
         self.pos[0] += self.vel[0]
         self.pos[1] += self.vel[1]
+        if self.pos[0] // 800 == 1:
+            self.pos[0] = 0
+        elif self.pos[0] // 800 < 0:
+            self.pos[0] = 800
+        if self.pos[1] // 600 == 1:
+            self.pos[1] = 0
+        elif self.pos[1] // 600 < 0:
+            self.pos[1] = 600
+        self.vel[0] *= .92
+        self.vel[1] *= .92
+        self.vel[0] += self.forward[0]
+        self.vel[1] += self.forward[1]
+        if self.thrust == True:
+            self.forward = angle_to_vector(self.angle)
+        
+    def keydown(self,key):
+        ang_vel = .09
+        if key == simplegui.KEY_MAP['left']:
+            self.angle_vel = - ang_vel
+        elif key == simplegui.KEY_MAP['right']:
+            self.angle_vel = ang_vel
+        elif key == simplegui.KEY_MAP['up']:
+            self.thrust = True
+            if self.thrust == True:
+                self.vel[0] += self.forward[0] * .1
+                self.vel[1] += self.forward[1] * .1
+                sound = ship_thrust_sound
+                sound.play()
+                            
+    def keyup(self,key):
+        angle_vel = 0
+        if key == simplegui.KEY_MAP['right']:
+            my_ship.angle_vel = angle_vel
+        elif key == simplegui.KEY_MAP['left']:
+            my_ship.angle_vel = angle_vel
+        elif key == simplegui.KEY_MAP['up']:
+            self.thrust = False
+            if self.thrust == False:
+                self.forward = [0,0]
+                sound = ship_thrust_sound
+                sound.pause()
     
 # Sprite class
 class Sprite:
@@ -141,6 +185,7 @@ def draw(canvas):
                                 [width/2+1.25*wtime, height/2], [width-2.5*wtime, height])
     canvas.draw_image(debris_image, [size[0]-wtime, center[1]], [2*wtime, size[1]], 
                                 [1.25*wtime, height/2], [2.5*wtime, height])
+    
 
     # draw ship and sprites
     my_ship.draw(canvas)
@@ -157,25 +202,16 @@ def rock_spawner():
     pass
     
 def key_down(key):
-    angle_vel = .1
-    if key == simplegui.KEY_MAP['left']:
-        my_ship.angle_vel = - angle_vel
-    elif key == simplegui.KEY_MAP['right']:
-        my_ship.angle_vel = angle_vel
+    my_ship.keydown(key)
     
 def key_up(key):
-    angle_vel = 0
-    #my_ship.angle_vel = angle_vel
-    if key == simplegui.KEY_MAP['right']:
-        my_ship.angle_vel = angle_vel
-    elif key == simplegui.KEY_MAP['left']:
-        my_ship.angle_vel = angle_vel
+    my_ship.keyup(key)
     
 # initialize frame
 frame = simplegui.create_frame("Asteroids", width, height)
 
 # initialize ship and two sprites
-my_ship = Ship([width / 2, height / 2], [.5, .5], 1.5 * math.pi, ship_image, ship_info)
+my_ship = Ship([width / 2, height / 2], [0, 0], 1.5 * math.pi, ship_image, ship_info)
 a_rock = Sprite([width / 3, height / 3], [1, 1], 0, 0, asteroid_image, asteroid_info)
 a_missile = Sprite([2 * width / 3, 2 * height / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound)
 
