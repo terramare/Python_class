@@ -114,12 +114,14 @@ class Ship:
             self.pos[1] = 0
         elif self.pos[1] // 600 < 0:
             self.pos[1] = 600
-        self.vel[0] *= .92
-        self.vel[1] *= .92
-        self.vel[0] += self.forward[0]
-        self.vel[1] += self.forward[1]
+        # the following two lines are to induce friction, which caps maximum velocity 
+        # and also causes ship to slowly stop by itself when thrusters are off
+        self.vel[0] *= .99
+        self.vel[1] *= .99
         if self.thrust == True:
             self.forward = angle_to_vector(self.angle)
+            self.vel[0] += self.forward[0] * .12
+            self.vel[1] += self.forward[1] * .12
         
     def keydown(self,key):
         ang_vel = .09
@@ -130,8 +132,8 @@ class Ship:
         elif key == simplegui.KEY_MAP['up']:
             self.thrust = True
             if self.thrust == True:
-                self.vel[0] += self.forward[0] * .1
-                self.vel[1] += self.forward[1] * .1
+#                self.vel[0] += self.forward[0] * .1
+#                self.vel[1] += self.forward[1] * .1
                 sound = ship_thrust_sound
                 sound.play()
                             
@@ -167,10 +169,13 @@ class Sprite:
             sound.play()
    
     def draw(self, canvas):
-        canvas.draw_circle(self.pos, self.radius, 1, "Red", "Red")
-    
+        canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size, self.angle)
+        
+        
     def update(self):
-        pass
+        self.pos[0] += self.vel[0]
+        self.pos[1] += self.vel[1]
+        self.angle += self.angle_vel
            
 def draw(canvas):
     global time
@@ -199,7 +204,8 @@ def draw(canvas):
             
 # timer handler that spawns a rock    
 def rock_spawner():
-    pass
+    global a_rock
+    a_rock = Sprite([width * random.random(), height * random.random()], [random.random() * 3 - 1.5,random.random() * 3 - 1.5], 0, (random.random() - .5) / 8, asteroid_image, asteroid_info)
     
 def key_down(key):
     my_ship.keydown(key)
@@ -211,8 +217,10 @@ def key_up(key):
 frame = simplegui.create_frame("Asteroids", width, height)
 
 # initialize ship and two sprites
+
 my_ship = Ship([width / 2, height / 2], [0, 0], 1.5 * math.pi, ship_image, ship_info)
-a_rock = Sprite([width / 3, height / 3], [1, 1], 0, 0, asteroid_image, asteroid_info)
+a_rock = Sprite([width * random.random(), height * random.random()], [1, 1], 0, 0, asteroid_image, asteroid_info)
+# a_rock = rock_spawner()
 a_missile = Sprite([2 * width / 3, 2 * height / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound)
 
 # register handlers
