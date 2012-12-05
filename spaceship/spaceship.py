@@ -132,11 +132,11 @@ class Ship:
         elif key == simplegui.KEY_MAP['up']:
             self.thrust = True
             if self.thrust == True:
-#                self.vel[0] += self.forward[0] * .1
-#                self.vel[1] += self.forward[1] * .1
                 sound = ship_thrust_sound
                 sound.play()
-                            
+        elif key == simplegui.KEY_MAP['space']:
+            self.shoot()
+            
     def keyup(self,key):
         angle_vel = 0
         if key == simplegui.KEY_MAP['right']:
@@ -149,7 +149,12 @@ class Ship:
                 self.forward = [0,0]
                 sound = ship_thrust_sound
                 sound.pause()
-    
+                
+    def shoot(self):
+        global a_missile
+        vector = angle_to_vector(my_ship.angle)
+        a_missile = Sprite([my_ship.pos[0] + (vector[0] * my_ship.radius),my_ship.pos[1] + (vector[1] * my_ship.radius)], [my_ship.vel[0] + (vector[0] * 5),my_ship.vel[1] + (vector[1] * 5)], 0, 0, missile_image, missile_info, missile_sound)
+        
 # Sprite class
 class Sprite:
     def __init__(self, pos, vel, ang, ang_vel, image, info, sound = None):
@@ -191,7 +196,6 @@ def draw(canvas):
     canvas.draw_image(debris_image, [size[0]-wtime, center[1]], [2*wtime, size[1]], 
                                 [1.25*wtime, height/2], [2.5*wtime, height])
     
-
     # draw ship and sprites
     my_ship.draw(canvas)
     a_rock.draw(canvas)
@@ -201,7 +205,7 @@ def draw(canvas):
     my_ship.update()
     a_rock.update()
     a_missile.update()
-            
+    
 # timer handler that spawns a rock    
 def rock_spawner():
     global a_rock
@@ -219,8 +223,7 @@ frame = simplegui.create_frame("Asteroids", width, height)
 # initialize ship and two sprites
 
 my_ship = Ship([width / 2, height / 2], [0, 0], 1.5 * math.pi, ship_image, ship_info)
-a_rock = Sprite([width * random.random(), height * random.random()], [1, 1], 0, 0, asteroid_image, asteroid_info)
-# a_rock = rock_spawner()
+a_rock = Sprite([width * random.random(), height * random.random()], [random.random() * 3 - 1.5,random.random() * 3 - 1.5], 0, (random.random() - .5) / 8, asteroid_image, asteroid_info)
 a_missile = Sprite([2 * width / 3, 2 * height / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound)
 
 # register handlers
