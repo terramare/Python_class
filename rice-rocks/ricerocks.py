@@ -200,14 +200,11 @@ def draw(canvas):
     
     # draw ship and sprites
     my_ship.draw(canvas)
-    for rock in rock_group:
-        rock.draw(canvas)
+    process_sprite_group(rock_group,canvas)
     a_missile.draw(canvas)
     
     # update ship and sprites
     my_ship.update()
-    for rock in rock_group:
-        rock.update()
     a_missile.update()
     
     canvas.draw_text("Lives: " + str(lives), (width * 0.05, height * 0.1), 24, "White")
@@ -218,7 +215,12 @@ def draw(canvas):
 #        canvas.draw_image(splash_image, splash_info.get_center(), 
 #                          splash_info.get_size(), [width/2, height/2], 
 #                          splash_info.get_size())
-    
+
+def process_sprite_group(group_name, canvas_name):
+    for sprite in group_name:
+        sprite.draw(canvas_name)
+        sprite.update()
+        
 # timer handler that spawns a rock    
 def rock_spawner():
     global rock_group
