@@ -98,6 +98,12 @@ class Ship:
         self.radius = info.get_radius()
         self.forward = [0,0]
         
+    def get_position(self):
+        return self.pos
+    
+    def get_radius(self):
+        return self.radius
+    
     def draw(self,canvas):
         #canvas.draw_circle(self.pos, self.radius, 1, "White", "White")
         canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size, self.angle)
@@ -158,7 +164,7 @@ class Ship:
         missile_vel = [self.vel[0] + 6 * forward[0], self.vel[1] + 6 * forward[1]]
         a_missile = Sprite(missile_pos, missile_vel, self.angle, 0, missile_image, missile_info, missile_sound)
 
-        # Sprite class
+# Sprite class
 class Sprite:
     def __init__(self, pos, vel, ang, ang_vel, image, info, sound = None):
         self.pos = [pos[0],pos[1]]
@@ -175,7 +181,13 @@ class Sprite:
         if sound:
             sound.rewind()
             sound.play()
-   
+    
+    def get_position(self):
+        return self.pos
+    
+    def get_radius(self):
+        return self.radius
+    
     def draw(self, canvas):
         canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size, self.angle)
         
@@ -183,9 +195,18 @@ class Sprite:
         self.pos[0] = (self.pos[0] + self.vel[0]) % width
         self.pos[1] = (self.pos[1] + self.vel[1]) % height
         self.angle += self.angle_vel
-           
+        
+    def collide(self, other_object):
+        other_pos = other_object.get_position()
+        other_rad = other_object.get_radius()
+        dist = [self.pos[0] - other_pos[0],self.pos[1] - other_pos[1]]
+        if dist[0] < self.radius + other_rad or dist[1] < self.radius + other_rad:
+            return True
+        else:
+            return False
+        
 def draw(canvas):
-    global time
+    global time, lives
     
     # animate background
     time += 1
@@ -206,7 +227,9 @@ def draw(canvas):
     # update ship and sprites
     my_ship.update()
     a_missile.update()
-    
+    for rock in rock_group:
+        if rock.collide(my_ship) == True:
+            lives -= 1
     canvas.draw_text("Lives: " + str(lives), (width * 0.05, height * 0.1), 24, "White")
     canvas.draw_text("Score: " + str(score), (width * 0.8, height * 0.1), 24, "White")
     
@@ -220,6 +243,13 @@ def process_sprite_group(group_name, canvas_name):
     for sprite in group_name:
         sprite.draw(canvas_name)
         sprite.update()
+        
+def group_collide(group, other_object):
+    remove_set = ([])
+    for sprite in group:
+        if sprite.collide(other_object) == True:
+            remove_set.add(sprite)
+        group.difference_update(remove_set)
         
 # timer handler that spawns a rock    
 def rock_spawner():
