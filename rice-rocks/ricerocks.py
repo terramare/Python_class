@@ -199,14 +199,14 @@ class Sprite:
     def collide(self, other_object):
         other_pos = other_object.get_position()
         other_rad = other_object.get_radius()
-        dist = [self.pos[0] - other_pos[0],self.pos[1] - other_pos[1]]
-        if dist[0] < self.radius + other_rad or dist[1] < self.radius + other_rad:
+        distance = dist(self.pos,other_pos)
+        if distance < self.radius + other_rad:
             return True
         else:
             return False
         
 def draw(canvas):
-    global time, lives
+    global time, lives, rock_group
     
     # animate background
     time += 1
@@ -227,9 +227,12 @@ def draw(canvas):
     # update ship and sprites
     my_ship.update()
     a_missile.update()
-    for rock in rock_group:
-        if rock.collide(my_ship) == True:
-            lives -= 1
+    if group_collide(rock_group, my_ship) > 0:
+        lives -= 1
+#    for rock in rock_group:
+#        if rock.collide(my_ship) == True:
+#            lives -= 1
+            
     canvas.draw_text("Lives: " + str(lives), (width * 0.05, height * 0.1), 24, "White")
     canvas.draw_text("Score: " + str(score), (width * 0.8, height * 0.1), 24, "White")
     
@@ -246,10 +249,13 @@ def process_sprite_group(group_name, canvas_name):
         
 def group_collide(group, other_object):
     remove_set = ([])
+    collisions = 0
     for sprite in group:
         if sprite.collide(other_object) == True:
             remove_set.add(sprite)
+            collisions += 1
         group.difference_update(remove_set)
+    return collisions
         
 # timer handler that spawns a rock    
 def rock_spawner():
@@ -263,14 +269,17 @@ def key_down(key):
 def key_up(key):
     my_ship.keyup(key)
     
+def tester():
+    for rock in rock_group:
+        print rock
+    
 # initialize frame
 frame = simplegui.create_frame("Asteroids", width, height)
 
 # initialize ship and two sprites
 
 my_ship = Ship([width / 2, height / 2], [0, 0], 1.5 * math.pi, ship_image, ship_info)
-a_rock = Sprite([width * random.random(), height * random.random()], [random.random() * 3 - 1.5,random.random() * 3 - 1.5], 0, (random.random() - .5) / 8, asteroid_image, asteroid_info)
-rock_group.add(a_rock)
+rock_group.add(Sprite([width * random.random(), height * random.random()], [random.random() * 3 - 1.5,random.random() * 3 - 1.5], 0, (random.random() - .5) / 8, asteroid_image, asteroid_info))
 a_missile = Sprite([2 * width / 3, 2 * height / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound)
 
 # register handlers
@@ -279,7 +288,9 @@ frame.set_keydown_handler(key_down)
 frame.set_keyup_handler(key_up)
 
 timer = simplegui.create_timer(1000.0, rock_spawner)
+test_timer = simplegui.create_timer(4000.0, tester)
 
 # get things rolling
 timer.start()
+test_timer.start()
 frame.start()
