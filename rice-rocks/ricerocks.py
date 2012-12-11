@@ -183,7 +183,9 @@ class Sprite:
         return self.radius
     
     def draw(self, canvas):
-        canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size, self.angle)
+        global started
+        if started:
+            canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size, self.angle)
         
     def update(self):
         self.pos[0] = (self.pos[0] + self.vel[0]) % width
@@ -230,10 +232,13 @@ def draw(canvas):
         lives -= 1
     group_group_collide(missile_group, rock_group)
     
+    # end of game handling
     if lives == 0:
         started = False
         rock_group = set([])
         timer.stop()
+        soundtrack.rewind()
+        
     # draw score and lives
     canvas.draw_text("Lives: " + str(lives), (width * 0.05, height * 0.1), 24, "White")
     canvas.draw_text("Score: " + str(score), (width * 0.8, height * 0.1), 24, "White")
@@ -244,7 +249,7 @@ def draw(canvas):
                           splash_info.get_size(), [width/2, height/2], 
                           splash_info.get_size())
     
-    # draw splash screen if not started
+# draw splash screen at launch and after each game ends
 def click(pos):
     global started, lives
     center = [width / 2, height / 2]
@@ -255,44 +260,48 @@ def click(pos):
         started = True
         lives = 3
         timer.start()
+        rock_spawner()
+        soundtrack.play()
 
+# feeds draw handler for sprite groups
 def process_sprite_group(group_name, canvas_name):
     for sprite in group_name:
         remove_sprite = set([])
         sprite.draw(canvas_name)
-        # sprite.update()
         if sprite.update() == False:
             remove_sprite.add(sprite)
         group_name.difference_update(remove_sprite)
         
+# removes sprites upon collision with ship
 def group_collide(group, other_object):
     remove_set = set([])
-    #collisions = 0
     for sprite in group:
         if sprite.collide(other_object) == True:
             remove_set.add(sprite)
-            #collisions += 1
         group.difference_update(remove_set)
-    #return collisions
     if len(remove_set) > 0:
         return True
 
+# handles collisions between missiles and rocks
 def group_group_collide(group1, group2):
     remove_set = set([])
     global score
     for sprite in group1:
-        #score = score + (group_collide(group2,sprite) * 10)
         if group_collide(group2,sprite) == True:
             score += 10
             remove_set.add(sprite)
         group1.difference_update(remove_set)
         
-# timer handler that spawns a rock    
+# timer handler that spawns rock sprites
 def rock_spawner():
     global rock_group
+    rock_pos = [width * random.random(), height * random.random()]
+    rock_vel = [random.random() * 3 - 1.5,random.random() * 3 - 1.5]
+    distance = dist(rock_pos, my_ship.get_position())
     if started:
         if len(rock_group) < 12:
-            rock_group.add(Sprite([width * random.random(), height * random.random()], [random.random() * 3 - 1.5,random.random() * 3 - 1.5], 0, (random.random() - .5) / 8, asteroid_image, asteroid_info))
+            if distance > my_ship.get_radius() + asteroid_info.get_radius() + 60:
+                rock_group.add(Sprite(rock_pos, rock_vel, 0, (random.random() - .5) / 8, asteroid_image, asteroid_info))
     
 def key_down(key):
     my_ship.keydown(key)
@@ -300,16 +309,15 @@ def key_down(key):
 def key_up(key):
     my_ship.keyup(key)
     
-# initialize frame
+# frame initialization
 frame = simplegui.create_frame("Asteroids", width, height)
 
-# initialize ship and two sprites
-
+# ship and sprite initialization
 my_ship = Ship([width / 2, height / 2], [0, 0], 1.5 * math.pi, ship_image, ship_info)
 rock_group.add(Sprite([width * random.random(), height * random.random()], [random.random() * 3 - 1.5,random.random() * 3 - 1.5], 0, (random.random() - .5) / 8, asteroid_image, asteroid_info))
 missile_group.add(Sprite([2 * width / 3, 2 * height / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound))
 
-# register handlers
+# handler registration
 frame.set_draw_handler(draw)
 frame.set_keydown_handler(key_down)
 frame.set_keyup_handler(key_up)
