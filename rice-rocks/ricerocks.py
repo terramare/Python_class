@@ -205,7 +205,7 @@ class Sprite:
             return False
         
 def draw(canvas):
-    global time, lives
+    global time, lives, started, rock_group
     
     # animate background
     time += 1
@@ -225,18 +225,36 @@ def draw(canvas):
     
     # update ship and sprites
     my_ship.update()
-#    missile_group.update()
+    # missile_group.update()
     if group_collide(rock_group, my_ship) > 0:
         lives -= 1
-            
+    group_group_collide(missile_group, rock_group)
+    
+    if lives == 0:
+        started = False
+        rock_group = set([])
+        timer.stop()
+    # draw score and lives
     canvas.draw_text("Lives: " + str(lives), (width * 0.05, height * 0.1), 24, "White")
     canvas.draw_text("Score: " + str(score), (width * 0.8, height * 0.1), 24, "White")
     
     # draw splash screen if not started
-#    if not started:
-#        canvas.draw_image(splash_image, splash_info.get_center(), 
-#                          splash_info.get_size(), [width/2, height/2], 
-#                          splash_info.get_size())
+    if not started:
+        canvas.draw_image(splash_image, splash_info.get_center(), 
+                          splash_info.get_size(), [width/2, height/2], 
+                          splash_info.get_size())
+    
+    # draw splash screen if not started
+def click(pos):
+    global started, lives
+    center = [width / 2, height / 2]
+    size = splash_info.get_size()
+    inwidth = (center[0] - size[0] / 2) < pos[0] < (center[0] + size[0] / 2)
+    inheight = (center[1] - size[1] / 2) < pos[1] < (center[1] + size[1] / 2)
+    if (not started) and inwidth and inheight:
+        started = True
+        lives = 3
+        timer.start()
 
 def process_sprite_group(group_name, canvas_name):
     for sprite in group_name:
@@ -249,29 +267,38 @@ def process_sprite_group(group_name, canvas_name):
         
 def group_collide(group, other_object):
     remove_set = set([])
-    collisions = 0
+    #collisions = 0
     for sprite in group:
         if sprite.collide(other_object) == True:
             remove_set.add(sprite)
-            collisions += 1
+            #collisions += 1
         group.difference_update(remove_set)
-    return collisions
+    #return collisions
+    if len(remove_set) > 0:
+        return True
+
+def group_group_collide(group1, group2):
+    remove_set = set([])
+    global score
+    for sprite in group1:
+        #score = score + (group_collide(group2,sprite) * 10)
+        if group_collide(group2,sprite) == True:
+            score += 10
+            remove_set.add(sprite)
+        group1.difference_update(remove_set)
         
 # timer handler that spawns a rock    
 def rock_spawner():
     global rock_group
-    if len(rock_group) < 12:
-        rock_group.add(Sprite([width * random.random(), height * random.random()], [random.random() * 3 - 1.5,random.random() * 3 - 1.5], 0, (random.random() - .5) / 8, asteroid_image, asteroid_info))
+    if started:
+        if len(rock_group) < 12:
+            rock_group.add(Sprite([width * random.random(), height * random.random()], [random.random() * 3 - 1.5,random.random() * 3 - 1.5], 0, (random.random() - .5) / 8, asteroid_image, asteroid_info))
     
 def key_down(key):
     my_ship.keydown(key)
     
 def key_up(key):
     my_ship.keyup(key)
-    
-def tester():
-    for rock in rock_group:
-        print rock
     
 # initialize frame
 frame = simplegui.create_frame("Asteroids", width, height)
@@ -286,11 +313,10 @@ missile_group.add(Sprite([2 * width / 3, 2 * height / 3], [-1,1], 0, 0, missile_
 frame.set_draw_handler(draw)
 frame.set_keydown_handler(key_down)
 frame.set_keyup_handler(key_up)
+frame.set_mouseclick_handler(click)
 
 timer = simplegui.create_timer(1000.0, rock_spawner)
-test_timer = simplegui.create_timer(4000.0, tester)
 
 # get things rolling
 timer.start()
-test_timer.start()
 frame.start()
