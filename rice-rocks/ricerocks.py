@@ -11,6 +11,7 @@ lives = 3
 time = 0
 started = False
 rock_group = set([])
+missile_group = set([])
 
 class ImageInfo:
     def __init__(self, center, size, radius = 0, lifespan = None, animated = False):
@@ -37,7 +38,6 @@ class ImageInfo:
 
     def get_animated(self):
         return self.animated
-
     
 # art assets created by Kim Lathrop, may be freely re-used in non-commercial projects, please credit Kim
     
@@ -105,7 +105,6 @@ class Ship:
         return self.radius
     
     def draw(self,canvas):
-        #canvas.draw_circle(self.pos, self.radius, 1, "White", "White")
         canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size, self.angle)
         if self.thrust == True:
             canvas.draw_image(self.image, [self.image_center[0] + 90, self.image_center[1]], self.image_size, self.pos, self.image_size, self.angle)
@@ -152,17 +151,12 @@ class Ship:
                 sound = ship_thrust_sound
                 sound.pause()
                 
-#    def shoot(self):
-#        global a_missile
-#        vector = angle_to_vector(my_ship.angle)
-#        a_missile = Sprite([my_ship.pos[0] + (vector[0] * my_ship.radius),my_ship.pos[1] + (vector[1] * my_ship.radius)], [my_ship.vel[0] + (vector[0] * 5),my_ship.vel[1] + (vector[1] * 5)], 0, 0, missile_image, missile_info, missile_sound)
-        
     def shoot(self):
-        global a_missile
+        global missile_group
         forward = angle_to_vector(self.angle)
         missile_pos = [self.pos[0] + self.radius * forward[0], self.pos[1] + self.radius * forward[1]]
         missile_vel = [self.vel[0] + 6 * forward[0], self.vel[1] + 6 * forward[1]]
-        a_missile = Sprite(missile_pos, missile_vel, self.angle, 0, missile_image, missile_info, missile_sound)
+        missile_group.add(Sprite(missile_pos, missile_vel, self.angle, 0, missile_image, missile_info, missile_sound))
 
 # Sprite class
 class Sprite:
@@ -195,6 +189,11 @@ class Sprite:
         self.pos[0] = (self.pos[0] + self.vel[0]) % width
         self.pos[1] = (self.pos[1] + self.vel[1]) % height
         self.angle += self.angle_vel
+        self.age += 1
+        if self.age < self.lifespan:
+            return True
+        else:
+            return False
         
     def collide(self, other_object):
         other_pos = other_object.get_position()
@@ -206,7 +205,7 @@ class Sprite:
             return False
         
 def draw(canvas):
-    global time, lives, rock_group
+    global time, lives
     
     # animate background
     time += 1
@@ -222,16 +221,13 @@ def draw(canvas):
     # draw ship and sprites
     my_ship.draw(canvas)
     process_sprite_group(rock_group,canvas)
-    a_missile.draw(canvas)
+    process_sprite_group(missile_group,canvas)
     
     # update ship and sprites
     my_ship.update()
-    a_missile.update()
+#    missile_group.update()
     if group_collide(rock_group, my_ship) > 0:
         lives -= 1
-#    for rock in rock_group:
-#        if rock.collide(my_ship) == True:
-#            lives -= 1
             
     canvas.draw_text("Lives: " + str(lives), (width * 0.05, height * 0.1), 24, "White")
     canvas.draw_text("Score: " + str(score), (width * 0.8, height * 0.1), 24, "White")
@@ -244,11 +240,15 @@ def draw(canvas):
 
 def process_sprite_group(group_name, canvas_name):
     for sprite in group_name:
+        remove_sprite = set([])
         sprite.draw(canvas_name)
-        sprite.update()
+        # sprite.update()
+        if sprite.update() == False:
+            remove_sprite.add(sprite)
+        group_name.difference_update(remove_sprite)
         
 def group_collide(group, other_object):
-    remove_set = ([])
+    remove_set = set([])
     collisions = 0
     for sprite in group:
         if sprite.collide(other_object) == True:
@@ -280,7 +280,7 @@ frame = simplegui.create_frame("Asteroids", width, height)
 
 my_ship = Ship([width / 2, height / 2], [0, 0], 1.5 * math.pi, ship_image, ship_info)
 rock_group.add(Sprite([width * random.random(), height * random.random()], [random.random() * 3 - 1.5,random.random() * 3 - 1.5], 0, (random.random() - .5) / 8, asteroid_image, asteroid_info))
-a_missile = Sprite([2 * width / 3, 2 * height / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound)
+missile_group.add(Sprite([2 * width / 3, 2 * height / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound))
 
 # register handlers
 frame.set_draw_handler(draw)
